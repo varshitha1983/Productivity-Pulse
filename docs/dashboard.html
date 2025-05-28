@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Productivity Pulse</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/themes.css">
+    <style>
+        /* Dashboard specific styles */
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: var(--transition);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+        
+        .stat-label {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+        
+        .stat-change {
+            display: flex;
+            align-items: center;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .stat-change.up {
+            color: var(--success);
+        }
+        
+        .stat-change.down {
+            color: var(--danger);
+        }
+        
+        .stat-change i {
+            margin-right: 0.25rem;
+        }
+        
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        @media (max-width: 768px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .chart-container {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .chart-legend {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .chart-legend span {
+            display: flex;
+            align-items: center;
+        }
+        
+        .chart-legend i {
+            margin-right: 0.25rem;
+            font-size: 0.8rem;
+        }
+        
+        .chart-placeholder {
+            height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text);
+            opacity: 0.7;
+        }
+        
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .insight-card {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .insight-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .insight-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            font-size: 1.2rem;
+        }
+        
+        .insight-title {
+            font-weight: 600;
+        }
+        
+        .insight-content {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+        
+        .insight-actions {
+            margin-top: 1rem;
+            display: flex;
+            justify-content: flex-end;
+        }
+        
+        .insight-btn {
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .time-period {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .period-btn {
+            background: var(--glass);
+            border: none;
+            color: var(--text);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+        
+        .period-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- Motivational Quote Reminder -->
+    <div class="quote-reminder pulse">
+        <div class="quote-content">
+            <span class="quote-text">"Productivity is being able to do things that you were never able to do before."</span>
+            <button class="close-quote">&times;</button>
+        </div>
+    </div>
+
+    <!-- Main Navigation -->
+    <nav class="glass-nav">
+        <div class="nav-container">
+            <!-- Dropdown Menu -->
+            <div class="dropdown">
+                <button class="dropbtn rainbow-text">☰ Productivity Pulse</button>
+                <div class="dropdown-content">
+                    <a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                    <a href="mood.html"><i class="fas fa-smile"></i> Mood Tracker</a>
+                    <a href="pomodoro.html"><i class="fas fa-clock"></i> Pomodoro Timer</a>
+                    <a href="tasks.html"><i class="fas fa-tasks"></i> Task Manager</a>
+                    <a href="todo.html"><i class="fas fa-check-circle"></i> To-Do List</a>
+                    <a href="screentime.html"><i class="fas fa-mobile-screen"></i> Screen Time</a>
+                </div>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="search-container">
+                <div class="search-bar">
+                    <input type="text" placeholder="Search features, tips, help..." id="search-input">
+                    <button class="search-btn"><i class="fas fa-search"></i></button>
+                </div>
+                <div class="search-suggestions"></div>
+            </div>
+
+            <!-- Right Icons -->
+            <div class="nav-icons">
+                <button id="theme-toggle" class="nav-icon" title="Toggle Theme">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button id="focus-mode" class="nav-icon" title="Distraction-Free Mode">
+                    <i class="fas fa-spa"></i>
+                </button>
+                <button id="settings-btn" class="nav-icon" title="Settings">
+                    <i class="fas fa-cog"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal glass-modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2 class="rainbow-text">Settings</h2>
+            <div class="settings-option">
+                <h3>Theme</h3>
+                <div class="theme-options">
+                    <button data-theme="light" class="theme-btn active">Light</button>
+                    <button data-theme="dark" class="theme-btn">Dark</button>
+                    <button data-theme="violet" class="theme-btn">Violet</button>
+                    <button data-theme="ocean" class="theme-btn">Ocean</button>
+                    <button data-theme="sunset" class="theme-btn">Sunset</button>
+                </div>
+            </div>
+            <div class="settings-option">
+                <h3>Font Size</h3>
+                <input type="range" min="12" max="24" value="16" class="font-slider" id="font-size">
+            </div>
+            <div class="settings-option">
+                <h3>Notifications</h3>
+                <label class="switch">
+                    <input type="checkbox" checked>
+                    <span class="slider round"></span>
+                </label>
+                <span class="switch-label">Enable notifications</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="dashboard-container">
+            <h1 class="gradient-text">Dashboard</h1>
+            <p class="subtitle">Your productivity overview and personal analytics</p>
+            
+            <div class="time-period">
+                <button class="period-btn active" data-period="week">This Week</button>
+                <button class="period-btn" data-period="month">This Month</button>
+                <button class="period-btn" data-period="year">This Year</button>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: rgba(108, 92, 231, 0.1); color: var(--primary);">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-value" id="focus-time">12.5h</div>
+                    <div class="stat-label">Focus Time</div>
+                    <div class="stat-change up">
+                        <i class="fas fa-arrow-up"></i> 18% from last week
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: rgba(0, 184, 148, 0.1); color: var(--success);">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-value" id="tasks-completed">24</div>
+                    <div class="stat-label">Tasks Completed</div>
+                    <div class="stat-change up">
+                        <i class="fas fa-arrow-up"></i> 33% from last week
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: rgba(253, 121, 168, 0.1); color: var(--accent);">
+                        <i class="fas fa-fire"></i>
+                    </div>
+                    <div class="stat-value" id="streak">7</div>
+                    <div class="stat-label">Day Streak</div>
+                    <div class="stat-change up">
+                        <i class="fas fa-arrow-up"></i> Keep it up!
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: rgba(253, 203, 110, 0.1); color: var(--warning);">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="stat-value" id="productivity-score">78%</div>
+                    <div class="stat-label">Productivity Score</div>
+                    <div class="stat-change up">
+                        <i class="fas fa-arrow-up"></i> 12% from last week
+                    </div>
+                </div>
+            </div>
+            
+            <div class="charts-grid">
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3>Focus Time Trend</h3>
+                        <div class="chart-legend">
+                            <span><i class="fas fa-square" style="color: #6c5ce7"></i> Focus Time</span>
+                            <span><i class="fas fa-square" style="color: #fd79a8"></i> Goal</span>
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="focus-chart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3>Productivity Breakdown</h3>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="productivity-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="charts-grid">
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3>Mood Correlation</h3>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="mood-chart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3>Activity Distribution</h3>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="activity-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <h2 style="margin: 2rem 0 1rem;">Personalized Insights</h2>
+            
+            <div class="insights-grid">
+                <div class="insight-card">
+                    <div class="insight-header">
+                        <div class="insight-icon">
+                            <i class="fas fa-lightbulb"></i>
+                        </div>
+                        <div class="insight-title">Peak Productivity</div>
+                    </div>
+                    <div class="insight-content">
+                        Your most productive time is between 10 AM and 12 PM. Try scheduling your most important tasks during this window.
+                    </div>
+                    <div class="insight-actions">
+                        <button class="insight-btn">
+                            View Details <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="insight-card">
+                    <div class="insight-header">
+                        <div class="insight-icon">
+                            <i class="fas fa-moon"></i>
+                        </div>
+                        <div class="insight-title">Sleep Quality</div>
+                    </div>
+                    <div class="insight-content">
+                        On days when you sleep 7+ hours, your productivity is 22% higher. Consider establishing a consistent sleep routine.
+                    </div>
+                    <div class="insight-actions">
+                        <button class="insight-btn">
+                            View Details <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="insight-card">
+                    <div class="insight-header">
+                        <div class="insight-icon">
+                            <i class="fas fa-running"></i>
+                        </div>
+                        <div class="insight-title">Activity Impact</div>
+                    </div>
+                    <div class="insight-content">
+                        Days with at least 30 minutes of physical activity show a 15% increase in focus time. Keep moving!
+                    </div>
+                    <div class="insight-actions">
+                        <button class="insight-btn">
+                            View Details <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

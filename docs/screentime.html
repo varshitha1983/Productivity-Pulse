@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Screen Time | Productivity Pulse</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/themes.css">
+    <style>
+        /* Screen Time specific styles */
+        .screentime-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .stat-label {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+        
+        .stat-change {
+            display: flex;
+            align-items: center;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .stat-change.up {
+            color: var(--success);
+        }
+        
+        .stat-change.down {
+            color: var(--danger);
+        }
+        
+        .stat-change i {
+            margin-right: 0.25rem;
+        }
+        
+        .time-period {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .period-btn {
+            background: var(--glass);
+            border: none;
+            color: var(--text);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+        
+        .period-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .chart-container {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .chart-placeholder {
+            height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text);
+            opacity: 0.7;
+        }
+        
+        .app-usage {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .app-list {
+            margin-top: 1rem;
+        }
+        
+        .app-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            transition: var(--transition);
+        }
+        
+        .app-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(5px);
+        }
+        
+        .app-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            margin-right: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: white;
+        }
+        
+        .app-info {
+            flex: 1;
+        }
+        
+        .app-name {
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+        
+        .app-time {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .app-percentage {
+            font-weight: 600;
+        }
+        
+        .progress-bar {
+            height: 6px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            margin-top: 0.5rem;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            border-radius: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            transition: width 1s ease;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            opacity: 0.7;
+        }
+        
+        .empty-state i {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+        
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Motivational Quote Reminder -->
+    <div class="quote-reminder pulse">
+        <div class="quote-content">
+            <span class="quote-text">"It's not about having time, it's about making time for what matters."</span>
+            <button class="close-quote">&times;</button>
+        </div>
+    </div>
+
+    <!-- Main Navigation -->
+    <nav class="glass-nav">
+        <div class="nav-container">
+            <!-- Dropdown Menu -->
+            <div class="dropdown">
+                <button class="dropbtn rainbow-text">☰ Productivity Pulse</button>
+                <div class="dropdown-content">
+                    <a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                    <a href="mood.html"><i class="fas fa-smile"></i> Mood Tracker</a>
+                    <a href="pomodoro.html"><i class="fas fa-clock"></i> Pomodoro Timer</a>
+                    <a href="tasks.html"><i class="fas fa-tasks"></i> Task Manager</a>
+                    <a href="todo.html"><i class="fas fa-check-circle"></i> To-Do List</a>
+                    <a href="screentime.html"><i class="fas fa-mobile-screen"></i> Screen Time</a>
+                </div>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="search-container">
+                <div class="search-bar">
+                    <input type="text" placeholder="Search features, tips, help..." id="search-input">
+                    <button class="search-btn"><i class="fas fa-search"></i></button>
+                </div>
+                <div class="search-suggestions"></div>
+            </div>
+
+            <!-- Right Icons -->
+            <div class="nav-icons">
+                <button id="theme-toggle" class="nav-icon" title="Toggle Theme">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button id="focus-mode" class="nav-icon" title="Distraction-Free Mode">
+                    <i class="fas fa-spa"></i>
+                </button>
+                <button id="settings-btn" class="nav-icon" title="Settings">
+                    <i class="fas fa-cog"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal glass-modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2 class="rainbow-text">Settings</h2>
+            <div class="settings-option">
+                <h3>Theme</h3>
+                <div class="theme-options">
+                    <button data-theme="light" class="theme-btn active">Light</button>
+                    <button data-theme="dark" class="theme-btn">Dark</button>
+                    <button data-theme="violet" class="theme-btn">Violet</button>
+                    <button data-theme="ocean" class="theme-btn">Ocean</button>
+                    <button data-theme="sunset" class="theme-btn">Sunset</button>
+                </div>
+            </div>
+            <div class="settings-option">
+                <h3>Font Size</h3>
+                <input type="range" min="12" max="24" value="16" class="font-slider" id="font-size">
+            </div>
+            <div class="settings-option">
+                <h3>Notifications</h3>
+                <label class="switch">
+                    <input type="checkbox" checked>
+                    <span class="slider round"></span>
+                </label>
+                <span class="switch-label">Enable notifications</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="screentime-container">
+            <h1 class="gradient-text">Screen Time</h1>
+            <p class="subtitle">Track and analyze your device usage to improve productivity</p>
+            
+            <div class="time-period">
+                <button class="period-btn active" data-period="day">Today</button>
+                <button class="period-btn" data-period="week">This Week</button>
+                <button class="period-btn" data-period="month">This Month</button>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="total-time">3h 42m</div>
+                    <div class="stat-label">Total Screen Time</div>
+                    <div class="stat-change down">
+                        <i class="fas fa-arrow-down"></i> 12% from yesterday
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-value" id="pickups">48</div>
+                    <div class="stat-label">Device Pickups</div>
+                    <div class="stat-change up">
+                        <i class="fas fa-arrow-up"></i> 5% from yesterday
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-value" id="avg-session">4.2m</div>
+                    <div class="stat-label">Avg. Session</div>
+                    <div class="stat-change down">
+                        <i class="fas fa-arrow-down"></i> 8% from yesterday
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-value" id="productive-time">1h 18m</div>
+                    <div class="stat-label">Productive Time</div>
+                    <div class="stat-change up">
+                        <i class="fas fa-arrow-up"></i> 22% from yesterday
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3>Daily Screen Time</h3>
+                    <div class="chart-legend">
+                        <span><i class="fas fa-square" style="color: #6c5ce7"></i> Total</span>
+                        <span><i class="fas fa-square" style="color: #00b894"></i> Productive</span>
+                    </div>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="time-chart"></canvas>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3>Usage Trends</h3>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="trend-chart"></canvas>
+                </div>
+            </div>
+            
+            <div class="app-usage">
+                <h3>App Usage</h3>
+                <p>Breakdown of time spent by application</p>
+                
+                <div class="app-list" id="app-list">
+                    <!-- App items will be inserted here -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+    <script src="js/screentime.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

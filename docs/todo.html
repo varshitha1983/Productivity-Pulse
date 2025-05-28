@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List | Productivity Pulse</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/themes.css">
+    <style>
+        /* To-Do List specific styles */
+        .todo-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .todo-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        
+        .view-options {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .view-btn {
+            background: var(--glass);
+            border: none;
+            color: var(--text);
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+        }
+        
+        .view-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .view-btn.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 0 0 2px var(--accent);
+        }
+        
+        .todo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .todo-card {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: var(--transition);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .todo-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .todo-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+        }
+        
+        .todo-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .todo-card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .todo-card-count {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.9rem;
+        }
+        
+        .todo-card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .todo-card-date {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .add-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 150px;
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            transition: var(--transition);
+        }
+        
+        .add-card:hover {
+            border-color: var(--primary);
+            background: rgba(108, 92, 231, 0.1);
+        }
+        
+        .add-card i {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+        
+        /* Task Modal */
+        .task-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+        }
+        
+        .task-modal.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .task-modal-content {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 20px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transform: translateY(20px);
+            transition: var(--transition);
+            padding: 2rem;
+        }
+        
+        .task-modal.active .task-modal-content {
+            transform: translateY(0);
+        }
+        
+        .task-modal-header {
+            background: var(--selected-color); /* This will be set dynamically */
+            color: white;
+            padding: 1.5rem;
+            margin: -2rem -2rem 1.5rem -2rem;
+            border-radius: 20px 20px 0 0;
+            position: relative;
+        }
+
+        .task-modal-title {
+            color: white;
+        }
+
+        .close-modal {
+            color: white !important;
+            opacity: 0.9 !important;
+            background: rgba(0, 0, 0, 0.2);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .close-modal:hover {
+            background: rgba(0, 0, 0, 0.3);
+            transform: rotate(90deg);
+            opacity: 1 !important;
+        }
+        
+        /* .task-modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        } */
+        
+        .task-modal-title-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text);
+            opacity: 0.7;
+            transition: var(--transition);
+        } */
+        
+        /* .close-modal:hover {
+            opacity: 1;
+            color: var(--accent);
+        } */
+        
+        .task-list {
+            margin: 1.5rem 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .task-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            transition: var(--transition);
+        }
+        
+        .task-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .task-check {
+            margin-right: 1rem;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        
+        .task-check i {
+            font-size: 1.2rem;
+            color: var(--text);
+            opacity: 0.7;
+        }
+        
+        .task-check.checked i {
+            color: var(--success);
+            opacity: 1;
+        }
+        
+        .task-content {
+            flex: 1;
+        }
+        
+        .task-text {
+            margin-bottom: 0.25rem;
+            word-break: break-word;
+        }
+        
+        .task-text.completed {
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+        
+        .task-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+        
+        .task-priority {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        
+        .task-priority.low {
+            background: #00b894;
+        }
+        
+        .task-priority.medium {
+            background: #fdcb6e;
+        }
+        
+        .task-priority.high {
+            background: #e17055;
+        }
+        
+        .task-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-left: 0.5rem;
+        }
+        
+        .task-btn {
+            background: none;
+            border: none;
+            color: var(--text);
+            cursor: pointer;
+            opacity: 0.7;
+            transition: var(--transition);
+        }
+        
+        .task-btn:hover {
+            opacity: 1;
+            color: var(--primary);
+        }
+        
+        .task-form {
+            margin-top: 1.5rem;
+        }
+        
+        .task-input {
+            width: 100%;
+            padding: 1rem;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text);
+            font-family: 'Poppins', sans-serif;
+            transition: var(--transition);
+        }
+        
+        .task-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px var(--primary);
+        }
+        
+        .task-form-footer {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1rem;
+        }
+        
+        .priority-select {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .priority-option {
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 1px solid transparent;
+            font-size: 0.9rem;
+        }
+        
+        .priority-option:hover {
+            border-color: var(--text);
+        }
+        
+        .priority-option.selected {
+            border-color: var(--primary);
+            background: rgba(108, 92, 231, 0.1);
+        }
+        
+        .priority-option.low .priority-dot {
+            background: #00b894;
+        }
+        
+        .priority-option.medium .priority-dot {
+            background: #fdcb6e;
+        }
+        
+        .priority-option.high .priority-dot {
+            background: #e17055;
+        }
+        
+        .priority-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 0.25rem;
+        }
+        
+        .add-task-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+        
+        .add-task-btn:hover {
+            background: var(--accent);
+            transform: translateY(-2px);
+        }
+        
+        /* List Settings Modal */
+        .settings-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+        }
+        
+        .settings-modal.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .settings-modal-content {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transform: translateY(20px);
+            transition: var(--transition);
+            padding: 2rem;
+        }
+        
+        .settings-modal.active .settings-modal-content {
+            transform: translateY(0);
+        }
+        
+        .settings-form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .settings-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .settings-input {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text);
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .settings-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px var(--primary);
+        }
+        
+        .color-picker {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        
+        .color-option {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 2px solid transparent;
+        }
+        
+        .color-option:hover {
+            transform: scale(1.1);
+        }
+        
+        .color-option.selected {
+            border-color: var(--text);
+            transform: scale(1.1);
+        }
+        
+        .settings-modal-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+        }
+        
+        .settings-btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+        
+        .settings-btn.delete {
+            background: rgba(214, 48, 49, 0.1);
+            border: 1px solid rgba(214, 48, 49, 0.3);
+            color: var(--danger);
+        }
+        
+        .settings-btn.delete:hover {
+            background: rgba(214, 48, 49, 0.2);
+        }
+        
+        .settings-btn.save {
+            background: var(--primary);
+            border: none;
+            color: white;
+        }
+        
+        .settings-btn.save:hover {
+            background: var(--accent);
+        }
+        
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            opacity: 0.7;
+        }
+        
+        .empty-state i {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .todo-card {
+            animation: fadeIn 0.3s ease forwards;
+        }
+        
+        .todo-card:nth-child(1) { animation-delay: 0.1s; }
+        .todo-card:nth-child(2) { animation-delay: 0.2s; }
+        .todo-card:nth-child(3) { animation-delay: 0.3s; }
+        .todo-card:nth-child(4) { animation-delay: 0.4s; }
+        .todo-card:nth-child(5) { animation-delay: 0.5s; }
+        .todo-card:nth-child(6) { animation-delay: 0.6s; }
+    </style>
+</head>
+<body>
+    <!-- Motivational Quote Reminder -->
+    <div class="quote-reminder pulse">
+        <div class="quote-content">
+            <span class="quote-text">"Productivity is never an accident. It is always the result of a commitment to excellence, intelligent planning, and focused effort."</span>
+            <button class="close-quote">&times;</button>
+        </div>
+    </div>
+
+    <!-- Main Navigation -->
+    <nav class="glass-nav">
+        <div class="nav-container">
+            <!-- Dropdown Menu -->
+            <div class="dropdown">
+                <button class="dropbtn rainbow-text">☰ Productivity Pulse</button>
+                <div class="dropdown-content">
+                    <a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                    <a href="mood.html"><i class="fas fa-smile"></i> Mood Tracker</a>
+                    <a href="pomodoro.html"><i class="fas fa-clock"></i> Pomodoro Timer</a>
+                    <a href="tasks.html"><i class="fas fa-tasks"></i> Task Manager</a>
+                    <a href="todo.html"><i class="fas fa-check-circle"></i> To-Do List</a>
+                    <a href="screentime.html"><i class="fas fa-mobile-screen"></i> Screen Time</a>
+                </div>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="search-container">
+                <div class="search-bar">
+                    <input type="text" placeholder="Search features, tips, help..." id="search-input">
+                    <button class="search-btn"><i class="fas fa-search"></i></button>
+                </div>
+                <div class="search-suggestions"></div>
+            </div>
+
+            <!-- Right Icons -->
+            <div class="nav-icons">
+                <button id="theme-toggle" class="nav-icon" title="Toggle Theme">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button id="focus-mode" class="nav-icon" title="Distraction-Free Mode">
+                    <i class="fas fa-spa"></i>
+                </button>
+                <button id="settings-btn" class="nav-icon" title="Settings">
+                    <i class="fas fa-cog"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal glass-modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2 class="rainbow-text">Settings</h2>
+            <div class="settings-option">
+                <h3>Theme</h3>
+                <div class="theme-options">
+                    <button data-theme="light" class="theme-btn active">Light</button>
+                    <button data-theme="dark" class="theme-btn">Dark</button>
+                    <button data-theme="violet" class="theme-btn">Violet</button>
+                    <button data-theme="ocean" class="theme-btn">Ocean</button>
+                    <button data-theme="sunset" class="theme-btn">Sunset</button>
+                </div>
+            </div>
+            <div class="settings-option">
+                <h3>Font Size</h3>
+                <input type="range" min="12" max="24" value="16" class="font-slider" id="font-size">
+            </div>
+            <div class="settings-option">
+                <h3>Notifications</h3>
+                <label class="switch">
+                    <input type="checkbox" checked>
+                    <span class="slider round"></span>
+                </label>
+                <span class="switch-label">Enable notifications</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="todo-container">
+            <div class="todo-header">
+                <h1 class="gradient-text">To-Do Lists</h1>
+                <div class="view-options">
+                    <button class="view-btn active" id="all-view">
+                        <i class="fas fa-list"></i> All
+                    </button>
+                    <button class="view-btn" id="favorites-view">
+                        <i class="fas fa-star"></i> Favorites
+                    </button>
+                    <button class="view-btn" id="sort-btn">
+                        <i class="fas fa-sort"></i> Sort
+                    </button>
+                    <button class="view-btn" id="filter-btn">
+                        <i class="fas fa-filter"></i> Filter
+                    </button>
+                </div>
+            </div>
+            
+            <div class="todo-grid" id="todo-grid">
+                <!-- To-Do cards will be inserted here -->
+                
+                <div class="todo-card add-card" id="add-todo-card">
+                    <i class="fas fa-plus"></i>
+                    <span>Add New List</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Task Modal -->
+    <div class="task-modal" id="task-modal">
+        <div class="task-modal-content">
+            <div class="task-modal-header">
+                <h2 class="task-modal-title">
+                    <span class="task-modal-title-color" id="modal-list-color"></span>
+                    <span id="modal-list-name">List Name</span>
+                </h2>
+                <button class="close-modal" id="close-task-modal">&times;</button>
+            </div>
+            
+            <div class="task-list" id="modal-task-list">
+                <!-- Tasks will be inserted here -->
+            </div>
+            
+            <div class="task-form">
+                <input type="text" class="task-input" id="new-task-input" placeholder="Add a new task...">
+                <div class="task-form-footer">
+                    <div class="priority-select">
+                        <div class="priority-option low" data-priority="low">
+                            <span class="priority-dot"></span> Low
+                        </div>
+                        <div class="priority-option medium" data-priority="medium">
+                            <span class="priority-dot"></span> Medium
+                        </div>
+                        <div class="priority-option high" data-priority="high">
+                            <span class="priority-dot"></span> High
+                        </div>
+                    </div>
+                    <button class="add-task-btn" id="add-task-btn">
+                        <i class="fas fa-plus"></i> Add
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- List Settings Modal -->
+    <div class="settings-modal" id="settings-modal-todo">
+        <div class="settings-modal-content">
+            <div class="task-modal-header">
+                <h2 class="task-modal-title">List Settings</h2>
+                <button class="close-modal" id="close-settings-modal">&times;</button>
+            </div>
+            
+            <form id="list-settings-form">
+                <div class="settings-form-group">
+                    <label for="list-name" class="settings-label">List Name</label>
+                    <input type="text" id="list-name" class="settings-input" required>
+                </div>
+                
+                <div class="settings-form-group">
+                    <label class="settings-label">Color</label>
+                    <div class="color-picker" id="color-picker-settings">
+                        <!-- Color options will be inserted here -->
+                    </div>
+                </div>
+                
+                <div class="settings-form-group">
+                    <label class="settings-label">Options</label>
+                    <div style="display: flex; gap: 1rem;">
+                        <label class="switch">
+                            <input type="checkbox" id="favorite-toggle">
+                            <span class="slider round"></span>
+                        </label>
+                        <span>Favorite</span>
+                    </div>
+                </div>
+                
+                <div class="settings-modal-actions">
+                    <button type="button" class="settings-btn delete" id="delete-list-btn">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                    <button type="submit" class="settings-btn save">
+                        <i class="fas fa-save"></i> Save
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/todo.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

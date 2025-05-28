@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pomodoro Timer | Productivity Pulse</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/themes.css">
+    <style>
+        /* Pomodoro-specific styles */
+        .pomodoro-container {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .timer-display {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin: 2rem auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .timer-circle {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(var(--primary) 0%, transparent 0%);
+            transition: all 1s linear;
+            z-index: 1;
+        }
+        
+        .timer-inner {
+            position: relative;
+            width: 90%;
+            height: 90%;
+            border-radius: 50%;
+            background: var(--glass);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+        }
+        
+        .time-left {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .timer-state {
+            font-size: 1.2rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--primary);
+        }
+        
+        .timer-controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        
+        .timer-btn {
+            background: var(--glass);
+            border: none;
+            color: var(--text);
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            box-shadow: var(--shadow);
+        }
+        
+        .timer-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .timer-btn.primary {
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            color: white;
+        }
+        
+        .timer-settings {
+            margin-top: 2rem;
+        }
+        
+        .setting-option {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: var(--glass);
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+        }
+        
+        .setting-label {
+            font-weight: 500;
+        }
+        
+        .setting-value {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .setting-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: none;
+            background: var(--primary);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .setting-input {
+            width: 50px;
+            text-align: center;
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            padding: 0.25rem;
+            color: var(--text);
+        }
+        
+        .pomodoro-stats {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .stat-card {
+            background: var(--glass);
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            min-width: 120px;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+        
+        .focus-music {
+            margin-top: 3rem;
+            background: var(--glass);
+            padding: 1.5rem;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        
+        .music-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .music-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .music-card:hover {
+            transform: translateY(-5px);
+            background: var(--primary);
+        }
+        
+        .music-card img {
+            width: 100%;
+            border-radius: 5px;
+            margin-bottom: 0.5rem;
+        }
+        
+        .music-card h4 {
+            margin-bottom: 0.25rem;
+        }
+        
+        .music-card p {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+        
+        @media (max-width: 768px) {
+            .timer-display {
+                width: 250px;
+                height: 250px;
+            }
+            
+            .time-left {
+                font-size: 2.5rem;
+            }
+            
+            .pomodoro-stats {
+                flex-direction: column;
+                align-items: center;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Motivational Quote Reminder -->
+    <div class="quote-reminder pulse">
+        <div class="quote-content">
+            <span class="quote-text">"Focus on being productive instead of busy."</span>
+            <button class="close-quote">&times;</button>
+        </div>
+    </div>
+
+    <!-- Main Navigation -->
+    <nav class="glass-nav">
+        <div class="nav-container">
+            <!-- Dropdown Menu -->
+            <div class="dropdown">
+                <button class="dropbtn rainbow-text">☰ Productivity Pulse</button>
+                <div class="dropdown-content">
+                    <a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                    <a href="mood.html"><i class="fas fa-smile"></i> Mood Tracker</a>
+                    <a href="pomodoro.html"><i class="fas fa-clock"></i> Pomodoro Timer</a>
+                    <a href="tasks.html"><i class="fas fa-tasks"></i> Task Manager</a>
+                    <a href="todo.html"><i class="fas fa-check-circle"></i> To-Do List</a>
+                    <a href="screentime.html"><i class="fas fa-mobile-screen"></i> Screen Time</a>
+                </div>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="search-container">
+                <div class="search-bar">
+                    <input type="text" placeholder="Search features, tips, help..." id="search-input">
+                    <button class="search-btn"><i class="fas fa-search"></i></button>
+                </div>
+                <div class="search-suggestions"></div>
+            </div>
+
+            <!-- Right Icons -->
+            <div class="nav-icons">
+                <button id="theme-toggle" class="nav-icon" title="Toggle Theme">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button id="focus-mode" class="nav-icon" title="Distraction-Free Mode">
+                    <i class="fas fa-spa"></i>
+                </button>
+                <button id="settings-btn" class="nav-icon" title="Settings">
+                    <i class="fas fa-cog"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal glass-modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2 class="rainbow-text">Settings</h2>
+            <div class="settings-option">
+                <h3>Theme</h3>
+                <div class="theme-options">
+                    <button data-theme="light" class="theme-btn active">Light</button>
+                    <button data-theme="dark" class="theme-btn">Dark</button>
+                    <button data-theme="violet" class="theme-btn">Violet</button>
+                    <button data-theme="ocean" class="theme-btn">Ocean</button>
+                    <button data-theme="sunset" class="theme-btn">Sunset</button>
+                </div>
+            </div>
+            <div class="settings-option">
+                <h3>Font Size</h3>
+                <input type="range" min="12" max="24" value="16" class="font-slider" id="font-size">
+            </div>
+            <div class="settings-option">
+                <h3>Notifications</h3>
+                <label class="switch">
+                    <input type="checkbox" checked>
+                    <span class="slider round"></span>
+                </label>
+                <span class="switch-label">Enable notifications</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="pomodoro-container">
+            <h1 class="gradient-text">Pomodoro Timer</h1>
+            <p class="subtitle">Boost your productivity with focused work sessions and regular breaks</p>
+            
+            <div class="timer-display">
+                <div class="timer-circle" id="timer-circle"></div>
+                <div class="timer-inner">
+                    <div class="time-left" id="time-left">25:00</div>
+                    <div class="timer-state" id="timer-state">Ready</div>
+                </div>
+            </div>
+            
+            <div class="timer-controls">
+                <button class="timer-btn primary" id="start-btn">
+                    <i class="fas fa-play"></i> Start
+                </button>
+                <button class="timer-btn" id="pause-btn" disabled>
+                    <i class="fas fa-pause"></i> Pause
+                </button>
+                <button class="timer-btn" id="reset-btn" disabled>
+                    <i class="fas fa-redo"></i> Reset
+                </button>
+            </div>
+            
+            <div class="timer-settings">
+                <h3><i class="fas fa-cog"></i> Timer Settings</h3>
+                
+                <div class="setting-option">
+                    <span class="setting-label">Work Duration (minutes)</span>
+                    <div class="setting-value">
+                        <button class="setting-btn" id="work-minus">-</button>
+                        <input type="number" class="setting-input" id="work-duration" value="25" min="1" max="60">
+                        <button class="setting-btn" id="work-plus">+</button>
+                    </div>
+                </div>
+                
+                <div class="setting-option">
+                    <span class="setting-label">Short Break (minutes)</span>
+                    <div class="setting-value">
+                        <button class="setting-btn" id="short-minus">-</button>
+                        <input type="number" class="setting-input" id="short-break" value="5" min="1" max="30">
+                        <button class="setting-btn" id="short-plus">+</button>
+                    </div>
+                </div>
+                
+                <div class="setting-option">
+                    <span class="setting-label">Long Break (minutes)</span>
+                    <div class="setting-value">
+                        <button class="setting-btn" id="long-minus">-</button>
+                        <input type="number" class="setting-input" id="long-break" value="15" min="1" max="60">
+                        <button class="setting-btn" id="long-plus">+</button>
+                    </div>
+                </div>
+                
+                <div class="setting-option">
+                    <span class="setting-label">Pomodoros Until Long Break</span>
+                    <div class="setting-value">
+                        <button class="setting-btn" id="pomo-minus">-</button>
+                        <input type="number" class="setting-input" id="pomo-count" value="4" min="1" max="10">
+                        <button class="setting-btn" id="pomo-plus">+</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pomodoro-stats">
+                <div class="stat-card">
+                    <div class="stat-value" id="completed-pomos">0</div>
+                    <div class="stat-label">Today's Pomodoros</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="total-focus">0h 0m</div>
+                    <div class="stat-label">Total Focus Time</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="streak-days">0</div>
+                    <div class="stat-label">Day Streak</div>
+                </div>
+            </div>
+            
+            <div class="focus-music">
+                <h3><i class="fas fa-music"></i> Focus Music Recommendations</h3>
+                <p>Enhance your focus with these curated playlists</p>
+                
+                <div class="music-grid">
+                    <div class="music-card">
+                        <img src="assets/images/lofi.jpg" alt="Lofi Beats">
+                        <h4>Lofi Beats</h4>
+                        <p>Chill instrumental beats</p>
+                    </div>
+                    <div class="music-card">
+                        <img src="assets/images/classical.jpg" alt="Classical">
+                        <h4>Classical Focus</h4>
+                        <p>Mozart, Beethoven</p>
+                    </div>
+                    <div class="music-card">
+                        <img src="assets/images/nature.jpg" alt="Nature Sounds">
+                        <h4>Nature Sounds</h4>
+                        <p>Rain, forest, waves</p>
+                    </div>
+                    <div class="music-card">
+                        <img src="assets/images/binaural.jpg" alt="Binaural Beats">
+                        <h4>Binaural Beats</h4>
+                        <p>Brainwave entrainment</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/pomodoro.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

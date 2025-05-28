@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mood Tracker | Productivity Pulse</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/themes.css">
+</head>
+<body>
+    <!-- Motivational Quote Reminder -->
+    <div class="quote-reminder pulse">
+        <div class="quote-content">
+            <span class="quote-text">"Your mood doesn't define your day. You define your day by how you respond to your mood."</span>
+            <button class="close-quote">&times;</button>
+        </div>
+    </div>
+
+    <!-- Main Navigation -->
+    <nav class="glass-nav">
+        <div class="nav-container">
+            <!-- Dropdown Menu -->
+            <div class="dropdown">
+                <button class="dropbtn rainbow-text">☰ Productivity Pulse</button>
+                <div class="dropdown-content">
+                    <a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                    <a href="mood.html"><i class="fas fa-smile"></i> Mood Tracker</a>
+                    <a href="pomodoro.html"><i class="fas fa-clock"></i> Pomodoro Timer</a>
+                    <a href="tasks.html"><i class="fas fa-tasks"></i> Task Manager</a>
+                    <a href="todo.html"><i class="fas fa-check-circle"></i> To-Do List</a>
+                    <a href="screentime.html"><i class="fas fa-mobile-screen"></i> Screen Time</a>
+                </div>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="search-container">
+                <div class="search-bar">
+                    <input type="text" placeholder="Search features, tips, help..." id="search-input">
+                    <button class="search-btn"><i class="fas fa-search"></i></button>
+                </div>
+                <div class="search-suggestions"></div>
+            </div>
+
+            <!-- Right Icons -->
+            <div class="nav-icons">
+                <button id="theme-toggle" class="nav-icon" title="Toggle Theme">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button id="focus-mode" class="nav-icon" title="Distraction-Free Mode">
+                    <i class="fas fa-spa"></i>
+                </button>
+                <button id="settings-btn" class="nav-icon" title="Settings">
+                    <i class="fas fa-cog"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal glass-modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2 class="rainbow-text">Settings</h2>
+            <div class="settings-option">
+                <h3>Theme</h3>
+                <div class="theme-options">
+                    <button data-theme="light" class="theme-btn active">Light</button>
+                    <button data-theme="dark" class="theme-btn">Dark</button>
+                    <button data-theme="violet" class="theme-btn">Violet</button>
+                    <button data-theme="ocean" class="theme-btn">Ocean</button>
+                    <button data-theme="sunset" class="theme-btn">Sunset</button>
+                </div>
+            </div>
+            <div class="settings-option">
+                <h3>Font Size</h3>
+                <input type="range" min="12" max="24" value="16" class="font-slider" id="font-size">
+            </div>
+            <div class="settings-option">
+                <h3>Notifications</h3>
+                <label class="switch">
+                    <input type="checkbox" checked>
+                    <span class="slider round"></span>
+                </label>
+                <span class="switch-label">Enable notifications</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content mood-page">
+        <div class="mood-container">
+            <h1 class="gradient-text">How Are You Feeling Today?</h1>
+            <p class="subtitle">Select your current mood to get personalized productivity recommendations</p>
+            
+            <div class="mood-selector">
+                <div class="mood-option" data-mood="excited">
+                    <div class="mood-icon">
+                        <i class="fas fa-grin-stars"></i>
+                    </div>
+                    <span>Excited</span>
+                </div>
+                
+                <div class="mood-option" data-mood="happy">
+                    <div class="mood-icon">
+                        <i class="fas fa-smile-beam"></i>
+                    </div>
+                    <span>Happy</span>
+                </div>
+                
+                <div class="mood-option" data-mood="neutral">
+                    <div class="mood-icon">
+                        <i class="fas fa-meh"></i>
+                    </div>
+                    <span>Neutral</span>
+                </div>
+                
+                <div class="mood-option" data-mood="tired">
+                    <div class="mood-icon">
+                        <i class="fas fa-tired"></i>
+                    </div>
+                    <span>Tired</span>
+                </div>
+                
+                <div class="mood-option" data-mood="stressed">
+                    <div class="mood-icon">
+                        <i class="fas fa-flushed"></i>
+                    </div>
+                    <span>Stressed</span>
+                </div>
+                
+                <div class="mood-option" data-mood="sad">
+                    <div class="mood-icon">
+                        <i class="fas fa-sad-tear"></i>
+                    </div>
+                    <span>Sad</span>
+                </div>
+            </div>
+            
+            <div class="mood-description">
+                <textarea id="mood-text" placeholder="Tell us more about how you're feeling... (optional)"></textarea>
+            </div>
+            
+            <button id="submit-mood" class="cta-btn pulse">Submit Mood</button>
+        </div>
+        
+        <div class="recommendations-container hidden">
+            <h2 class="gradient-text">Your Personalized Recommendations</h2>
+            <p class="subtitle">Based on your current mood, here are some suggestions to boost your productivity</p>
+            
+            <div class="recommendations-grid">
+                <!-- AI suggestions will be inserted here -->
+            </div>
+            
+            <div class="mood-history">
+                <h3>Your Mood History</h3>
+                <div class="history-chart">
+                    <canvas id="mood-chart"></canvas>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/mood.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
